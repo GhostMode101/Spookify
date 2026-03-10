@@ -41,9 +41,9 @@ jobs:
       - name: Frontend CI/CT (Lint, Test & Build)
         working-directory: ./Frontend
         run: |
-          bun install # Ensure coverage provider is in package.json
-          bun run lint || true
-          bun run test --coverage --watchAll=false
+          bun install
+          bun run lint || echo "Linting warnings ignored"
+          bun run test --coverage --run
           bun run build
 
       # Uncomment down the road once Backend/package.json has a valid testing script
