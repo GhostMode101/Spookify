@@ -22,6 +22,11 @@ jobs:
       # ----- 1. PRE-REQUISITES -----
       # Using Mac Runner's pre-installed tools. No artifact uploads necessary.
       
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Install Frontend Dependencies
         working-directory: ./Frontend
         # Leveraging persistent state on Mac - bun install caching is fast
