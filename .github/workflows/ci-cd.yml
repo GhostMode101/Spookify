@@ -60,8 +60,11 @@ jobs:
             -Dsonar.projectKey=Ghost-Spookify \
             -Dsonar.sources=./Frontend/src,./Backend \
             -Dsonar.host.url=http://localhost:9000 \
+            -Dsonar.token=$SONAR_TOKEN \
+            -Dsonar.login=$SONAR_TOKEN \
             -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts,**/*.test.ts,**/dist/**,**/build/** \
             -Dsonar.javascript.lcov.reportPaths=./Frontend/coverage/lcov.info
+
       # ----- 4. CONTINUOUS DEPLOYMENT (DOCKER) -----
       - name: Docker Login
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
