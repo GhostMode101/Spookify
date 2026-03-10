@@ -53,17 +53,16 @@ jobs:
 
       # ----- 3. SONARQUBE ANALYSIS -----
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v3.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: http://localhost:9000
-        with:
-          args: >
-            -Dsonar.projectKey=Ghost-Spookify
-            -Dsonar.sources=./Frontend/src,./Backend
-            -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts,**/*.test.ts,**/dist/**,**/build/**
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=Ghost-Spookify \
+            -Dsonar.sources=./Frontend/src,./Backend \
+            -Dsonar.host.url=http://localhost:9000 \
+            -Dsonar.login=$SONAR_TOKEN \
+            -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts,**/*.test.ts,**/dist/**,**/build/** \
             -Dsonar.javascript.lcov.reportPaths=./Frontend/coverage/lcov.info
-
       # ----- 4. CONTINUOUS DEPLOYMENT (DOCKER) -----
       - name: Docker Login
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
