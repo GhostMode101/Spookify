@@ -1,3 +1,97 @@
+
+
+
+Build a production-ready backend API for a music streaming platform called Spookify.
+
+Tech stack:
+
+* Node.js
+* Express.js
+* PostgreSQL
+* Docker-ready architecture
+* Environment variables for configuration
+* Modular folder structure
+
+Required project structure:
+
+backend/
+src/
+controllers/
+routes/
+services/
+middleware/
+config/
+uploads/
+Dockerfile
+docker-compose.yml
+package.json
+server.js
+
+API endpoints:
+
+GET /api/songs
+GET /api/songs/:id
+GET /api/search?q=
+POST /api/upload
+POST /api/playlists
+GET /api/playlists
+
+Database schema:
+
+songs
+
+* id (uuid primary key)
+* title
+* artist
+* genre
+* cover_url
+* audio_url
+* duration
+
+playlists
+
+* id
+* name
+
+playlist_songs
+
+* playlist_id
+* song_id
+
+Requirements:
+
+* Use multer for audio uploads
+* Store uploaded files locally in /uploads
+* Prepare storage abstraction so it can later be switched to S3
+* Add a /health endpoint for monitoring
+* Use dotenv for configuration
+* Use connection pooling for PostgreSQL
+
+DevOps requirements:
+
+* Provide a Dockerfile
+* Provide docker-compose with services:
+
+services:
+backend
+postgres
+
+The backend should listen on port 5000.
+
+The code should be structured so it can later be deployed behind an Nginx reverse proxy.
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Welcome to your Lovable project
 
 ## Project info

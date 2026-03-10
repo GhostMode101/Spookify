@@ -1,0 +1,77 @@
+name: Lean Mac CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test-scan-deploy:
+    name: Lean CI/CD Job
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ----- 1. PRE-REQUISITES -----
+      # Using Mac Runner's pre-installed tools. No artifact uploads necessary.
+      
+      - name: Install Frontend Dependencies
+        working-directory: ./Frontend
+        # Leveraging persistent state on Mac - bun install caching is fast
+        run: bun install
+
+      - name: Install Backend Dependencies
+        working-directory: ./Backend
+        # Leveraging persistent state for npm
+        run: npm ci || npm install
+
+      # ----- 2. CONTINUOUS INTEGRATION & TESTING -----
+      - name: Frontend CI/CT (Lint, Test & Build)
+        working-directory: ./Frontend
+        run: |
+          bun install # Ensure coverage provider is in package.json
+          bun run lint || true
+          bun run test --coverage --watchAll=false
+          bun run build
+
+      # Uncomment down the road once Backend/package.json has a valid testing script
+      # - name: Backend CI/CT
+      #   working-directory: ./Backend
+      #   run: npm run test
+
+      # ----- 3. SONARQUBE ANALYSIS -----
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v3.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://localhost:9000
+        with:
+          args: >
+            -Dsonar.projectKey=spookify
+            -Dsonar.sources=./Frontend/src,./Backend
+            -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts,**/*.test.ts,**/dist/**,**/build/**
+            -Dsonar.javascript.lcov.reportPaths=./Frontend/coverage/lcov.info
+
+      # ----- 4. CONTINUOUS DEPLOYMENT (DOCKER) -----
+      - name: Docker Login
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        # Log into Docker Hub automatically in the same workspace
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and Push Images
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          # Build Frontend
+          docker build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/spookify-frontend:latest ./Frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/spookify-frontend:latest
+          
+          # Build Backend
+          docker build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/spookify-backend:latest ./Backend
+          docker push ${{ secrets.DOCKER_USERNAME }}/spookify-backend:latest

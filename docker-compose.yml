@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:15-alpine
+    container_name: spookify-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-spookify_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-spookify_password}
+      POSTGRES_DB: ${DB_NAME:-spookify_db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-spookify_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - spookify_network
+
+  # Node.js Backend Service
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: spookify-backend
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-5000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-spookify_db}
+      DB_USER: ${DB_USER:-spookify_user}
+      DB_PASSWORD: ${DB_PASSWORD:-spookify_password}
+      UPLOAD_DIR: ./uploads
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-104857600}
+    ports:
+      - "${PORT:-5001}:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - spookify_network
+    restart: unless-stopped
+
+  # React Frontend Service
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: spookify-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - spookify_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  spookify_network:
+    driver: bridge
