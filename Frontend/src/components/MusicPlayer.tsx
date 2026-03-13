@@ -15,14 +15,14 @@ const MusicPlayer = () => {
   if (!currentSong) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-border/40">
+    <div className="fixed bottom-0 left-0 right-0 z-50 glass-player">
       <div className="mx-auto flex max-w-screen-xl items-center gap-4 px-4 py-3 md:px-6">
         {/* Song info */}
         <div className="flex min-w-0 items-center gap-3 flex-1 md:flex-[0.3]">
           <img
             src={currentSong.coverUrl || "/placeholder.svg"}
             alt={currentSong.title}
-            className="h-12 w-12 rounded-md object-cover"
+            className="h-12 w-12 rounded-lg object-cover ring-1 ring-white/10 shadow-lg shadow-black/30 transition-transform duration-300 hover:scale-105"
           />
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-foreground">{currentSong.title}</p>
@@ -33,16 +33,24 @@ const MusicPlayer = () => {
         {/* Controls */}
         <div className="flex flex-1 flex-col items-center gap-1">
           <div className="flex items-center gap-3">
-            <button onClick={prev} className="text-muted-foreground transition-colors hover:text-foreground">
+            <button
+              onClick={prev}
+              className="text-muted-foreground transition-all duration-300 hover:text-foreground hover:scale-110 active:scale-95"
+            >
               <SkipBack className="h-4 w-4" />
             </button>
             <button
               onClick={togglePlay}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-shadow hover:glow-primary"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground
+                shadow-lg shadow-primary/25 transition-all duration-300
+                hover:shadow-xl hover:shadow-primary/40 hover:scale-110 active:scale-95"
             >
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
             </button>
-            <button onClick={next} className="text-muted-foreground transition-colors hover:text-foreground">
+            <button
+              onClick={next}
+              className="text-muted-foreground transition-all duration-300 hover:text-foreground hover:scale-110 active:scale-95"
+            >
               <SkipForward className="h-4 w-4" />
             </button>
           </div>
@@ -63,7 +71,7 @@ const MusicPlayer = () => {
         <div className="hidden md:flex items-center gap-2 flex-[0.2] justify-end">
           <button
             onClick={() => setVolume(volume > 0 ? 0 : 0.8)}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-all duration-300 hover:scale-110"
           >
             {volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
           </button>

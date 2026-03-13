@@ -1,0 +1,61 @@
+// SpookieFY Prisma Schema — Phase 2: Matchmaking Engine
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  spotifyId    String   @unique
+  displayName  String?
+  email        String?
+  avatarUrl    String?
+  spotifyTier  String   @default("free")
+  accessToken  String
+  refreshToken String
+  topArtists   Json?    // Raw JSON array of top 50 artists from Spotify
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // ── Phase 2 Relations ──
+  swipesSent     Swipe[] @relation("SwiperRelation")
+  swipesReceived Swipe[] @relation("SwipedRelation")
+  matchesAsOne   Match[] @relation("MatchUserOne")
+  matchesAsTwo   Match[] @relation("MatchUserTwo")
+
+  @@map("users")
+}
+
+model Swipe {
+  id        String   @id @default(uuid()) @db.Uuid
+  swiperId  String   @db.Uuid
+  swipedId  String   @db.Uuid
+  action    String   // 'LIKE' or 'PASS'
+  createdAt DateTime @default(now())
+
+  swiper User @relation("SwiperRelation", fields: [swiperId], references: [id])
+  swiped User @relation("SwipedRelation", fields: [swipedId], references: [id])
+
+  @@unique([swiperId, swipedId])
+  @@map("swipes")
+}
+
+model Match {
+  id        String   @id @default(uuid()) @db.Uuid
+  userOneId String   @db.Uuid
+  userTwoId String   @db.Uuid
+  roomId    String   @default(uuid()) @db.Uuid // Socket room ID for Phase 3
+  createdAt DateTime @default(now())
+
+  userOne User @relation("MatchUserOne", fields: [userOneId], references: [id])
+  userTwo User @relation("MatchUserTwo", fields: [userTwoId], references: [id])
+
+  @@unique([userOneId, userTwoId])
+  @@map("matches")
+}

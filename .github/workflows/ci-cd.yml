@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
 
       # ----- 1. PRE-REQUISITES -----
-      # Using Mac Runner's pre-installed tools. No artifact uploads necessary.
+      # Using Mac Runner's pre-installed tools. No artifact uploads necessary
       
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2

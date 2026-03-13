@@ -1,3 +1,5 @@
+// This file is kept for backward compatibility with healthController.js
+// In a future phase, health checks should use Prisma directly.
 const { Pool } = require('pg');
 require('dotenv').config();
 
@@ -11,7 +13,6 @@ const pool = new Pool({
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
-  process.exit(-1);
 });
 
 module.exports = pool;
